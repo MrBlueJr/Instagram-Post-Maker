@@ -1,0 +1,1468 @@
+/* ============================================================
+   Instagram Post Maker — Studio Styling
+   ============================================================ */
+
+:root {
+    --bg-primary: #0b0c10;
+    --bg-surface: #14171e;
+    --bg-surface-hover: #1c202a;
+    --border-color: #262a36;
+    --border-light: #32384a;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #64748b;
+    --accent-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    --accent-color: #e6683c;
+    --ig-blue: #0095f6;
+    --ig-red: #ff3040;
+    --sidebar-width: 440px;
+    --header-height: 64px;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* ========================================
+   Header
+   ======================================== */
+.app-header {
+    height: var(--header-height);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-logo-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    box-shadow: 0 4px 14px rgba(220, 39, 67, 0.35);
+}
+
+.header-titles h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: block;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-top-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+}
+
+.action-top-btn.btn-primary {
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(220, 39, 67, 0.3);
+}
+
+.action-top-btn.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(220, 39, 67, 0.45);
+    opacity: 0.95;
+}
+
+.action-top-btn.btn-secondary {
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+}
+
+.action-top-btn.btn-secondary:hover {
+    background: var(--border-color);
+    border-color: var(--text-secondary);
+}
+
+/* ========================================
+   Main Workspace Layout
+   ======================================== */
+.app-main {
+    display: flex;
+    height: calc(100vh - var(--header-height));
+    margin-top: var(--header-height);
+}
+
+/* ========================================
+   Editor Sidebar — Full Height & No Truncation
+   ======================================== */
+.editor-sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 16px 220px 16px; /* Generous bottom padding so dropdowns drop down completely! */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+.editor-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.editor-sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+/* Sidebar Top Bar with Expand/Collapse All */
+.sidebar-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 6px;
+}
+
+.sidebar-top-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-top-title i {
+    color: var(--accent-color);
+}
+
+.sidebar-quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.panel-action-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.panel-action-btn:hover {
+    background: var(--bg-surface-hover);
+    color: var(--ig-blue);
+    border-color: var(--ig-blue);
+}
+
+/* Collapsible Sections */
+.editor-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: visible; /* Prevent any cutting off of dropdown content! */
+    transition: border-color var(--transition);
+}
+
+.editor-section:focus-within {
+    border-color: var(--border-light);
+}
+
+.section-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 15px;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.section-header:hover {
+    background: var(--bg-surface-hover);
+}
+
+.section-header span {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.section-header i:first-child {
+    font-size: 14px;
+    color: var(--accent-color);
+}
+
+.section-chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform var(--transition);
+}
+
+.section-header[aria-expanded="false"] .section-chevron {
+    transform: rotate(-90deg);
+}
+
+.section-body {
+    padding: 8px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.section-body.collapsed {
+    display: none;
+}
+
+/* Sub-panel for Show on Post Checkbox Grid */
+.sub-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 4px;
+}
+
+.sub-panel-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 8px;
+}
+
+/* Field Groups */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-group label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.field-group .optional {
+    font-weight: 400;
+    text-transform: none;
+    opacity: 0.7;
+}
+
+.field-group input[type="text"],
+.field-group input[type="number"],
+.field-group input[type="datetime-local"],
+.field-group textarea {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    width: 100%;
+}
+
+.field-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+    cursor: pointer;
+}
+
+.field-group input:focus,
+.field-group textarea:focus {
+    border-color: var(--ig-blue);
+    box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.2);
+}
+
+.field-group textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.char-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Time Presets */
+.time-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 3px;
+}
+
+.preset-pill {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.preset-pill:hover {
+    border-color: var(--ig-blue);
+    color: var(--text-primary);
+    background: var(--bg-surface-hover);
+}
+
+.preset-pill.active {
+    background: var(--ig-blue);
+    border-color: var(--ig-blue);
+    color: #fff;
+    font-weight: 600;
+}
+
+.auto-time-preview {
+    margin-top: 2px;
+}
+
+.preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(0, 149, 246, 0.1);
+    border: 1px solid rgba(0, 149, 246, 0.25);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 11.5px;
+}
+
+.preview-badge strong {
+    color: var(--ig-blue);
+}
+
+/* Checkbox Label */
+.field-row {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: var(--text-primary) !important;
+    user-select: none;
+}
+
+.checkbox-label input {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-light);
+    border-radius: 4px;
+    position: relative;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.checkbox-label input:checked + .checkmark {
+    background: var(--ig-blue);
+    border-color: var(--ig-blue);
+}
+
+.checkbox-label input:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Toggle Buttons (Radiogroup style) */
+.toggle-group {
+    display: flex;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--bg-surface);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.toggle-btn + .toggle-btn {
+    border-left: 1px solid var(--border-color);
+}
+
+.toggle-btn.active {
+    background: var(--ig-blue);
+    color: #fff;
+}
+
+.toggle-btn:hover:not(.active) {
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+}
+
+/* Profile Picture Upload */
+.profile-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-pic-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--border-light);
+}
+
+.profile-pic-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+}
+
+.upload-btn {
+    padding: 8px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.upload-btn:hover {
+    border-color: var(--ig-blue);
+    background: var(--bg-surface-hover);
+}
+
+.upload-btn.btn-ghost {
+    padding: 8px 10px;
+    color: #ef4444;
+}
+
+.upload-btn.btn-ghost:hover {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Image Drop Zone */
+.image-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: rgba(20, 23, 30, 0.5);
+}
+
+.image-drop-zone:hover,
+.image-drop-zone.dragover {
+    border-color: var(--ig-blue);
+    background: rgba(0, 149, 246, 0.08);
+}
+
+.image-drop-zone i {
+    font-size: 28px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.image-drop-zone p {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.image-drop-zone span {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+/* Carousel Thumbnails */
+.thumbnail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hint-text {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.thumbnail-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.thumbnail-item {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--border-color);
+    cursor: grab;
+    background: #000;
+}
+
+.thumbnail-item.dragging {
+    opacity: 0.4;
+}
+
+.thumbnail-item.drag-over {
+    border-color: var(--ig-blue);
+    transform: scale(1.05);
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-index {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.thumbnail-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.75);
+    border: none;
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transition: opacity var(--transition), transform var(--transition);
+}
+
+.thumbnail-remove:hover {
+    opacity: 1;
+    background: #ff3040;
+    transform: scale(1.1);
+}
+
+.add-more-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-surface);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all var(--transition);
+    margin-top: 4px;
+}
+
+.add-more-btn:hover {
+    border-color: var(--ig-blue);
+    color: var(--ig-blue);
+    background: var(--bg-surface-hover);
+}
+
+/* Comments List in Editor */
+.comment-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+}
+
+.comment-row-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comment-row .comment-user {
+    flex: 1;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px 9px;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    outline: none;
+}
+
+.comment-row .comment-text {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px 9px;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    outline: none;
+    line-height: 1.4;
+    resize: vertical;
+    min-height: 48px;
+}
+
+.comment-row input:focus,
+.comment-row textarea:focus {
+    border-color: var(--ig-blue);
+}
+
+.comment-verified-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.comment-verified-label input {
+    accent-color: var(--ig-blue);
+}
+
+.remove-comment-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.remove-comment-btn:hover {
+    background: #ff3040;
+    border-color: #ff3040;
+    color: #fff;
+}
+
+.add-comment-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all var(--transition);
+}
+
+.add-comment-btn:hover {
+    border-color: var(--ig-blue);
+    color: var(--ig-blue);
+    background: var(--bg-surface-hover);
+}
+
+/* ========================================
+   Live Preview Canvas Area
+   ======================================== */
+.preview-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+    background: radial-gradient(circle at top, #161922 0%, var(--bg-primary) 100%);
+}
+
+.preview-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.preview-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    background: rgba(20, 23, 30, 0.7);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+/* ========================================
+   Instagram Card Mockup (Light & Dark Theme)
+   ======================================== */
+.phone-frame {
+    width: 400px;
+    border-radius: 16px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* Theme: Light */
+.phone-frame.theme-light {
+    --card-bg: #ffffff;
+    --card-text: #262626;
+    --card-text-muted: #8e8e8e;
+    --card-border: #efefef;
+    --card-tag: #00376b;
+    --card-pfp-border: #dbdbdb;
+    --card-hover: rgba(0, 0, 0, 0.05);
+}
+
+/* Theme: Dark */
+.phone-frame.theme-dark {
+    --card-bg: #000000;
+    --card-text: #f5f5f5;
+    --card-text-muted: #a8a8a8;
+    --card-border: #262626;
+    --card-tag: #e0f1ff;
+    --card-pfp-border: #363636;
+    --card-hover: rgba(255, 255, 255, 0.1);
+}
+
+.ig-post {
+    background: var(--card-bg);
+    color: var(--card-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+
+/* Header Row */
+.ig-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.ig-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* High-Resolution Avatar & Story Ring */
+.ig-avatar-wrapper {
+    position: relative;
+    padding: 2px;
+    border-radius: 50%;
+    transition: all var(--transition);
+}
+
+.ig-avatar-wrapper.has-story-ring {
+    background: var(--accent-gradient);
+    padding: 2.5px;
+}
+
+.ig-profile-pic {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--card-pfp-border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e5e7eb;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.ig-avatar-wrapper.has-story-ring .ig-profile-pic {
+    border: 2px solid var(--card-bg);
+}
+
+.ig-profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+    transform: translateZ(0);
+}
+
+.ig-profile-pic svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ig-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ig-username-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ig-username {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--card-text);
+    cursor: pointer;
+}
+
+.ig-verified svg {
+    display: block;
+}
+
+.ig-follow-btn {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ig-blue);
+    cursor: pointer;
+    margin-left: 2px;
+}
+
+.ig-follow-btn.following-mode {
+    color: var(--card-text-muted);
+    font-weight: 500;
+}
+
+.ig-location {
+    font-size: 11.5px;
+    color: var(--card-text);
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.ig-header-right {
+    cursor: pointer;
+    padding: 4px;
+    color: var(--card-text);
+}
+
+/* Post Media Container */
+.ig-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+    user-select: none;
+}
+
+.ig-image-wrapper {
+    display: flex;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ig-image-slide {
+    min-width: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.ig-image-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ig-placeholder {
+    background: #1f232b;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.placeholder-content i {
+    font-size: 48px;
+    opacity: 0.6;
+}
+
+.placeholder-content span {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Carousel Counter Badge (1/3 pill) */
+.carousel-counter-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(18, 18, 18, 0.72);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    z-index: 4;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* Tagged People Icon (Bottom-Left Badge) */
+.ig-tagged-people-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(18, 18, 18, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Carousel Arrow Navigation */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    border: none;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    color: #111;
+    font-size: 12px;
+}
+
+.ig-image-container:hover .carousel-arrow {
+    opacity: 1;
+}
+
+.carousel-arrow:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-arrow-left {
+    left: 10px;
+}
+
+.carousel-arrow-right {
+    right: 10px;
+}
+
+/* Pagination Dots */
+.carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+    background: var(--ig-blue);
+    transform: scale(1.15);
+}
+
+/* Double-tap Heart Pop */
+.double-tap-heart {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.45));
+}
+
+.double-tap-heart.animate {
+    animation: doubleTapHeart 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes doubleTapHeart {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+    45%, 75% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+/* Action Icons Bar */
+.ig-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 6px;
+}
+
+.ig-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ig-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--card-text);
+    transition: transform var(--transition);
+}
+
+.ig-action-btn:hover {
+    transform: scale(1.12);
+}
+
+.ig-action-btn:active {
+    transform: scale(0.9);
+}
+
+.ig-action-btn .heart-filled {
+    animation: heartBounce 0.35s ease;
+}
+
+@keyframes heartBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+/* Likes Row */
+.ig-likes {
+    padding: 0 14px 6px;
+}
+
+.ig-likes-count {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--card-text);
+}
+
+.ig-liked-by {
+    font-size: 13.5px;
+    color: var(--card-text);
+}
+
+.ig-liked-by-name {
+    font-weight: 600;
+}
+
+/* Caption Row — Enhanced for Newlines & Multi-paragraph */
+.ig-caption {
+    padding: 0 14px 6px;
+    font-size: 13.5px;
+    color: var(--card-text);
+    line-height: 1.45;
+}
+
+.ig-caption-user {
+    font-weight: 600;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.ig-caption-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.ig-tag {
+    color: var(--card-tag);
+    cursor: pointer;
+}
+
+.phone-frame.theme-dark .ig-tag {
+    color: #e0f1ff;
+}
+
+.ig-caption.truncated .ig-caption-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+}
+
+.ig-caption-more {
+    color: var(--card-text-muted);
+    cursor: pointer;
+    font-size: 13.5px;
+    margin-left: 4px;
+}
+
+/* Comments List */
+.ig-comments-section {
+    padding: 0 14px 4px;
+}
+
+.ig-view-comments {
+    font-size: 13.5px;
+    color: var(--card-text-muted);
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.ig-comment {
+    font-size: 13.5px;
+    color: var(--card-text);
+    margin-bottom: 5px;
+    line-height: 1.35;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.ig-comment-content {
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ig-comment-user {
+    font-weight: 600;
+    margin-right: 4px;
+    cursor: pointer;
+}
+
+.ig-comment-verified {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.ig-comment-heart {
+    color: var(--card-text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding-left: 8px;
+}
+
+.ig-comment-heart.liked {
+    color: var(--ig-red);
+}
+
+/* Posted Timestamp */
+.ig-time {
+    padding: 4px 14px 12px;
+    font-size: 10px;
+    color: var(--card-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Quick Add Comment Box */
+.ig-add-comment-box {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-top: 1px solid var(--card-border);
+    gap: 10px;
+}
+
+.ig-mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8e8e8e;
+    font-size: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.ig-mini-avatar img, .ig-mini-avatar svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.phone-frame.theme-dark .ig-mini-avatar {
+    background: #2a2a2a;
+    color: #666;
+}
+
+.ig-comment-input {
+    flex: 1;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: var(--card-text);
+    outline: none;
+    font-family: inherit;
+}
+
+.ig-comment-input::placeholder {
+    color: var(--card-text-muted);
+}
+
+.ig-comment-post-btn {
+    background: none;
+    border: none;
+    color: var(--ig-blue);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity var(--transition);
+}
+
+.ig-comment-post-btn.active,
+.ig-comment-post-btn:hover {
+    opacity: 1;
+}
+
+/* ========================================
+   Responsive Media Queries — No 52vh limitation!
+   ======================================== */
+@media (max-width: 900px) {
+    .app-main {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - var(--header-height));
+        overflow-y: auto;
+    }
+
+    .editor-sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: none; /* Completely removed 52vh truncation! Dropdowns now drop down with full space */
+        overflow: visible;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 16px 40px 16px;
+    }
+
+    .preview-area {
+        padding: 24px;
+        overflow: visible;
+    }
+
+    .phone-frame {
+        width: 100%;
+        max-width: 390px;
+    }
+}
+
+@media (max-width: 520px) {
+    .header-titles .header-subtitle {
+        display: none;
+    }
+    .action-top-btn span {
+        display: none;
+    }
+    .action-top-btn {
+        padding: 9px 12px;
+    }
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}
