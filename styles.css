@@ -1421,6 +1421,392 @@ html, body {
 }
 
 /* ========================================
+   Music & Audio Section (Editor & Post)
+   ======================================== */
+.sub-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.source-tab-group {
+    margin-bottom: 8px;
+}
+
+.preset-audio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.preset-audio-pill {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition);
+    text-align: left;
+}
+
+.preset-audio-pill i {
+    color: var(--ig-blue);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.preset-audio-pill:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-light);
+}
+
+.preset-audio-pill.active {
+    background: rgba(0, 149, 246, 0.15);
+    border-color: var(--ig-blue);
+    color: #ffffff;
+    box-shadow: 0 0 0 1px var(--ig-blue);
+}
+
+.preset-audio-pill.active i {
+    color: #38bdf8;
+}
+
+/* Audio Drop Zone */
+.audio-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: var(--bg-surface);
+    margin-bottom: 6px;
+}
+
+.audio-drop-zone:hover,
+.audio-drop-zone.dragover {
+    border-color: var(--ig-blue);
+    background: rgba(0, 149, 246, 0.05);
+}
+
+.audio-drop-zone i {
+    font-size: 26px;
+    color: var(--ig-blue);
+    margin-bottom: 6px;
+}
+
+.audio-drop-zone p {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.audio-drop-zone span {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.audio-file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.audio-file-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+.audio-file-badge i {
+    color: var(--ig-blue);
+}
+
+.audio-file-badge .file-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+.remove-audio-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 13px;
+    transition: color var(--transition);
+}
+
+.remove-audio-btn:hover {
+    color: var(--ig-red);
+}
+
+/* Sidebar Mini Audio Player */
+.sidebar-audio-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin: 8px 0 12px 0;
+}
+
+.audio-play-trigger-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    border: none;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(220, 39, 67, 0.35);
+    transition: transform var(--transition);
+}
+
+.audio-play-trigger-btn:hover {
+    transform: scale(1.08);
+}
+
+.audio-play-trigger-btn:active {
+    transform: scale(0.95);
+}
+
+.audio-player-progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.audio-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.audio-seek-slider {
+    width: 100%;
+    height: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--border-color);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.audio-seek-slider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ig-blue);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.audio-seek-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+.audio-vol-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.vol-icon {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 14px;
+    text-align: center;
+}
+
+.audio-vol-slider {
+    width: 100%;
+    height: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--border-color);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.audio-vol-slider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    cursor: pointer;
+}
+
+/* Post Mockup Header Music Tag */
+.ig-music-line {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--card-text);
+    line-height: 1.2;
+    cursor: pointer;
+    margin-top: 1px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.ig-music-line:hover {
+    opacity: 0.82;
+}
+
+.ig-music-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    color: var(--card-text);
+}
+
+.music-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 10px;
+    color: var(--card-text);
+}
+
+.music-bars .bar {
+    width: 2px;
+    background-color: currentColor;
+    border-radius: 1px;
+}
+
+.music-bars .bar-1 { height: 3px; animation: igEqualizer 0.5s ease-in-out infinite alternate; }
+.music-bars .bar-2 { height: 9px; animation: igEqualizer 0.7s ease-in-out 0.15s infinite alternate; }
+.music-bars .bar-3 { height: 5px; animation: igEqualizer 0.6s ease-in-out 0.3s infinite alternate; }
+
+@keyframes igEqualizer {
+    0% { height: 2px; }
+    100% { height: 10px; }
+}
+
+.ig-music-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Post Mockup Speaker Button (Bottom-Right corner) */
+.ig-audio-speaker-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(18, 18, 18, 0.78);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 4;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.ig-audio-speaker-btn:hover {
+    transform: scale(1.1);
+    background: rgba(18, 18, 18, 0.92);
+}
+
+.ig-audio-speaker-btn:active {
+    transform: scale(0.92);
+}
+
+/* Audio Toast on Toggle */
+.ig-audio-toast {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(18, 18, 18, 0.88);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+    letter-spacing: 0.2px;
+    max-width: 85%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ig-audio-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.ig-audio-toast i {
+    font-size: 12px;
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+
+/* ========================================
    Responsive Media Queries — No 52vh limitation!
    ======================================== */
 @media (max-width: 900px) {

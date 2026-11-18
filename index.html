@@ -139,6 +139,16 @@
                                 <span class="checkmark"></span>
                                 "Add a comment..." Box
                             </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showMusicToggle" checked>
+                                <span class="checkmark"></span>
+                                Audio / Music Tag
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showSpeakerToggle" checked>
+                                <span class="checkmark"></span>
+                                Photo Speaker Button
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -235,7 +245,141 @@
                 </div>
             </div>
 
-            <!-- 4. Caption & Engagement Section -->
+            <!-- 4. Music & Audio Section -->
+            <div class="editor-section" data-section="audio">
+                <button class="section-header" aria-expanded="true">
+                    <span><i class="fa-solid fa-music"></i> Music &amp; Audio</span>
+                    <i class="fa-solid fa-chevron-down section-chevron"></i>
+                </button>
+                <div class="section-body">
+                    <div class="field-group">
+                        <label>Post Audio Status</label>
+                        <div class="toggle-group" id="soundToggleGroup">
+                            <button type="button" class="toggle-btn" data-sound="off">No Sound</button>
+                            <button type="button" class="toggle-btn active" data-sound="on">
+                                <i class="fa-solid fa-volume-high"></i> Sound Added
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="soundControlsGroup">
+                        <div class="field-group">
+                            <label for="trackTitleInput">Track Title</label>
+                            <input type="text" id="trackTitleInput" value="Birds of a Feather" placeholder="e.g. Birds of a Feather or Original Audio">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="artistNameInput">Artist Name</label>
+                            <input type="text" id="artistNameInput" value="Billie Eilish" placeholder="e.g. Billie Eilish or instagram">
+                        </div>
+
+                        <div class="field-group">
+                            <label>Audio Source</label>
+                            <div class="toggle-group source-tab-group" id="audioSourceTabGroup">
+                                <button type="button" class="toggle-btn active" data-source="preset"><i class="fa-solid fa-wand-magic-sparkles"></i> Preset Vibes</button>
+                                <button type="button" class="toggle-btn" data-source="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button>
+                                <button type="button" class="toggle-btn" data-source="url"><i class="fa-solid fa-link"></i> Link</button>
+                            </div>
+                        </div>
+
+                        <!-- Presets Tab Content -->
+                        <div class="audio-tab-content" id="presetTabContent">
+                            <label class="sub-label">Select Audio Vibe</label>
+                            <div class="preset-audio-grid" id="presetAudioGrid">
+                                <button type="button" class="preset-audio-pill active" data-preset-id="lofi" data-title="Lofi Sunset Chill" data-artist="Chillhop Vibes">
+                                    <i class="fa-solid fa-cloud-moon"></i>
+                                    <span>Lofi Sunset</span>
+                                </button>
+                                <button type="button" class="preset-audio-pill" data-preset-id="dreampop" data-title="Dream Pop Waves" data-artist="Aesthetic Echoes">
+                                    <i class="fa-solid fa-sparkles"></i>
+                                    <span>Dream Pop</span>
+                                </button>
+                                <button type="button" class="preset-audio-pill" data-preset-id="acoustic" data-title="Acoustic Breeze" data-artist="Golden Hour Strings">
+                                    <i class="fa-solid fa-guitar"></i>
+                                    <span>Acoustic</span>
+                                </button>
+                                <button type="button" class="preset-audio-pill" data-preset-id="upbeat" data-title="Upbeat Groove" data-artist="Club Rhythm">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>Upbeat Pop</span>
+                                </button>
+                                <button type="button" class="preset-audio-pill" data-preset-id="chill" data-title="Cozy Piano &amp; Rain" data-artist="Tranquil Moments">
+                                    <i class="fa-solid fa-mug-hot"></i>
+                                    <span>Cozy Piano</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Tab Content -->
+                        <div class="audio-tab-content" id="uploadTabContent" style="display:none;">
+                            <label class="sub-label">Upload Audio File (MP3, WAV, M4A, OGG)</label>
+                            <div class="audio-drop-zone" id="audioDropZone">
+                                <i class="fa-solid fa-file-audio"></i>
+                                <p id="audioDropText">Drag &amp; drop audio file here</p>
+                                <span>or click to browse files</span>
+                            </div>
+                            <input type="file" id="audioFileInput" accept="audio/*" hidden>
+                            <div class="audio-file-info" id="audioFileInfo" style="display:none;">
+                                <div class="audio-file-badge">
+                                    <i class="fa-solid fa-music"></i>
+                                    <span class="file-name" id="audioFileName">track.mp3</span>
+                                </div>
+                                <button type="button" class="remove-audio-btn" id="removeAudioBtn" title="Remove custom audio">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- URL Tab Content -->
+                        <div class="audio-tab-content" id="urlTabContent" style="display:none;">
+                            <label for="audioUrlInput" class="sub-label">Direct Audio URL (MP3 / WAV)</label>
+                            <input type="text" id="audioUrlInput" placeholder="https://example.com/audio.mp3">
+                        </div>
+
+                        <!-- Sidebar Mini Audio Player / Test Bar -->
+                        <div class="sidebar-audio-player">
+                            <button type="button" class="audio-play-trigger-btn" id="sidebarPlayBtn" title="Play / Pause Audio Preview">
+                                <i class="fa-solid fa-play" id="sidebarPlayIcon"></i>
+                            </button>
+                            <div class="audio-player-progress-wrap">
+                                <div class="audio-time-row">
+                                    <span id="audioCurrentTime">0:00</span>
+                                    <span id="audioTotalDuration">0:08</span>
+                                </div>
+                                <input type="range" class="audio-seek-slider" id="audioSeekSlider" value="0" min="0" max="100" step="0.1">
+                            </div>
+                            <div class="audio-vol-wrap">
+                                <i class="fa-solid fa-volume-high vol-icon" id="sidebarVolIcon"></i>
+                                <input type="range" class="audio-vol-slider" id="audioVolSlider" value="80" min="0" max="100" title="Audio Volume">
+                            </div>
+                        </div>
+
+                        <!-- Display Toggles -->
+                        <div class="field-group field-row">
+                            <label for="showMusicHeaderToggle" class="checkbox-label">
+                                <input type="checkbox" id="showMusicHeaderToggle" checked>
+                                <span class="checkmark"></span>
+                                Show Music Tag in Header (♫ Track • Artist)
+                            </label>
+                        </div>
+                        <div class="field-group field-row">
+                            <label for="showSpeakerIconToggle" class="checkbox-label">
+                                <input type="checkbox" id="showSpeakerIconToggle" checked>
+                                <span class="checkmark"></span>
+                                Show Speaker Button on Photo
+                            </label>
+                        </div>
+                        <div class="field-group field-row">
+                            <label for="loopAudioToggle" class="checkbox-label">
+                                <input type="checkbox" id="loopAudioToggle" checked>
+                                <span class="checkmark"></span>
+                                Loop Audio Playback
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Caption & Engagement Section -->
             <div class="editor-section" data-section="engagement">
                 <button class="section-header" aria-expanded="true">
                     <span><i class="fa-solid fa-heart"></i> Caption &amp; Likes</span>
@@ -310,7 +454,7 @@ Swipe to see the magic 👉
                 </div>
             </div>
 
-            <!-- 5. Comments Section -->
+            <!-- 6. Comments Section -->
             <div class="editor-section" data-section="comments">
                 <button class="section-header" aria-expanded="true">
                     <span><i class="fa-solid fa-comment-dots"></i> Comments (<span id="commentCountBadge">2</span>)</span>
@@ -358,6 +502,19 @@ Swipe to see the magic 👉
                                         <span class="ig-follow-btn" id="previewFollowBtn" style="display:none;">&bull; Follow</span>
                                     </div>
                                     <span class="ig-location" id="previewLocation" style="display:none;"></span>
+                                    <div class="ig-music-line" id="previewMusicLine" style="display:none;" title="Click to play / pause audio">
+                                        <div class="ig-music-icon-wrap">
+                                            <svg class="music-icon-note" viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+                                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                            </svg>
+                                            <div class="music-bars" id="musicBars" style="display:none;">
+                                                <span class="bar bar-1"></span>
+                                                <span class="bar bar-2"></span>
+                                                <span class="bar bar-3"></span>
+                                            </div>
+                                        </div>
+                                        <span class="ig-music-text" id="previewMusicText"></span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="ig-header-right" id="headerMenuBtn" title="More options">
@@ -399,6 +556,22 @@ Swipe to see the magic 👉
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="#ffffff">
                                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                                 </svg>
+                            </div>
+
+                            <!-- Audio Speaker Button (Bottom-Right) -->
+                            <button class="ig-audio-speaker-btn" id="audioSpeakerBtn" style="display:none;" title="Play / Mute Audio" aria-label="Toggle audio">
+                                <svg class="audio-icon-muted" viewBox="0 0 24 24" width="13" height="13" fill="#ffffff">
+                                    <path d="M3.63 3.63a.996.996 0 000 1.41L7.29 8.7 7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.14-.58.53-.58.92 0 .63.6 1.09 1.21.87.81-.3 1.55-.72 2.21-1.23l1.8 1.8a.996.996 0 101.41-1.41L5.05 3.63a.996.996 0 00-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zm-7-8l-1.88 1.88L12 7.76zm4.5 8A4.5 4.5 0 0014 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"/>
+                                </svg>
+                                <svg class="audio-icon-playing" viewBox="0 0 24 24" width="13" height="13" fill="#ffffff" style="display:none;">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                </svg>
+                            </button>
+
+                            <!-- Audio Toast on Toggle -->
+                            <div class="ig-audio-toast" id="audioToast" style="display:none;">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span id="audioToastText">Song Title • Artist</span>
                             </div>
 
                             <!-- Double-tap Heart Animation -->
@@ -465,6 +638,9 @@ Swipe to see the magic 👉
             </div>
         </div>
     </main>
+
+    <!-- Hidden audio element for preview playback -->
+    <audio id="postAudioPlayer" preload="auto"></audio>
 
     <script src="app.js"></script>
 </body>

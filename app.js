@@ -71,7 +71,24 @@
             caption: true,
             comments: true,
             time: true,
-            commentBox: true
+            commentBox: true,
+            music: true,
+            speaker: true
+        },
+        music: {
+            enabled: true,
+            title: 'Birds of a Feather',
+            artist: 'Billie Eilish',
+            sourceType: 'preset', // 'preset' | 'upload' | 'url'
+            presetId: 'lofi',
+            customAudioUrl: '',
+            uploadedFileName: '',
+            audioData: null,
+            volume: 0.8,
+            loop: true,
+            showInHeader: true,
+            showSpeakerBtn: true,
+            isPlaying: false
         },
         customViewComments: '',
         postType: 'carousel', // 'single' | 'carousel'
@@ -124,6 +141,8 @@
     const showCaptionToggle = $('#showCaptionToggle');
     const showCommentsToggle = $('#showCommentsToggle');
     const showTimeToggle = $('#showTimeToggle');
+    const showMusicToggle = $('#showMusicToggle');
+    const showSpeakerToggle = $('#showSpeakerToggle');
 
     // Sidebar - Profile
     const usernameInput = $('#username');
@@ -198,6 +217,42 @@
     const previewCommentBox = $('#previewCommentBox');
     const quickCommentInput = $('#quickCommentInput');
     const quickCommentBtn = $('#quickCommentBtn');
+
+    // Sidebar - Music & Audio Controls
+    const soundToggleBtns = $$('#soundToggleGroup .toggle-btn');
+    const soundControlsGroup = $('#soundControlsGroup');
+    const trackTitleInput = $('#trackTitleInput');
+    const artistNameInput = $('#artistNameInput');
+    const audioSourceTabBtns = $$('#audioSourceTabGroup .toggle-btn');
+    const presetTabContent = $('#presetTabContent');
+    const uploadTabContent = $('#uploadTabContent');
+    const urlTabContent = $('#urlTabContent');
+    const presetAudioPills = $$('.preset-audio-pill');
+    const audioDropZone = $('#audioDropZone');
+    const audioFileInput = $('#audioFileInput');
+    const audioFileInfo = $('#audioFileInfo');
+    const audioFileName = $('#audioFileName');
+    const removeAudioBtn = $('#removeAudioBtn');
+    const audioUrlInput = $('#audioUrlInput');
+    const sidebarPlayBtn = $('#sidebarPlayBtn');
+    const sidebarPlayIcon = $('#sidebarPlayIcon');
+    const audioCurrentTime = $('#audioCurrentTime');
+    const audioTotalDuration = $('#audioTotalDuration');
+    const audioSeekSlider = $('#audioSeekSlider');
+    const sidebarVolIcon = $('#sidebarVolIcon');
+    const audioVolSlider = $('#audioVolSlider');
+    const showMusicHeaderToggle = $('#showMusicHeaderToggle');
+    const showSpeakerIconToggle = $('#showSpeakerIconToggle');
+    const loopAudioToggle = $('#loopAudioToggle');
+
+    // Live Preview Post Music Elements
+    const previewMusicLine = $('#previewMusicLine');
+    const previewMusicText = $('#previewMusicText');
+    const musicBars = $('#musicBars');
+    const audioSpeakerBtn = $('#audioSpeakerBtn');
+    const audioToast = $('#audioToast');
+    const audioToastText = $('#audioToastText');
+    const postAudioPlayer = $('#postAudioPlayer');
 
     /* ========================================
        Collapsible Section Headers & Toolbar
@@ -383,6 +438,22 @@
         commentBoxToggle.addEventListener('change', () => {
             state.showCommentBox = commentBoxToggle.checked;
             state.visibility.commentBox = commentBoxToggle.checked;
+            updatePreview();
+        });
+    }
+
+    if (showMusicToggle) {
+        showMusicToggle.addEventListener('change', () => {
+            state.visibility.music = showMusicToggle.checked;
+            if (showMusicHeaderToggle) showMusicHeaderToggle.checked = showMusicToggle.checked;
+            updatePreview();
+        });
+    }
+
+    if (showSpeakerToggle) {
+        showSpeakerToggle.addEventListener('change', () => {
+            state.visibility.speaker = showSpeakerToggle.checked;
+            if (showSpeakerIconToggle) showSpeakerIconToggle.checked = showSpeakerToggle.checked;
             updatePreview();
         });
     }
@@ -590,6 +661,478 @@
             });
 
             thumbnailList.appendChild(item);
+        });
+    }
+
+    /* ========================================
+       Music Synthesizer & Audio Engine
+       ======================================== */
+    const presetAudioCache = {};
+
+    function writeWavString(view, offset, str) {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    }
+
+    function bufferToWavDataUrl(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        const chunkSize = 8192;
+        for (let i = 0; i < len; i += chunkSize) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, len)));
+        }
+        return 'data:audio/wav;base64,' + btoa(binary);
+    }
+
+    function generatePresetWav(presetId) {
+        if (presetAudioCache[presetId]) return presetAudioCache[presetId];
+
+        const sampleRate = 22050;
+        const durationSec = 8;
+        const numSamples = sampleRate * durationSec;
+        const buffer = new ArrayBuffer(44 + numSamples * 2);
+        const view = new DataView(buffer);
+
+        writeWavString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + numSamples * 2, true);
+        writeWavString(view, 8, 'WAVE');
+        writeWavString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, 1, true); // Mono
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeWavString(view, 36, 'data');
+        view.setUint32(40, numSamples * 2, true);
+
+        let offset = 44;
+        for (let i = 0; i < numSamples; i++) {
+            const t = i / sampleRate;
+            let s = 0;
+            if (presetId === 'lofi') {
+                const beat = (t * (80 / 60)) % 8;
+                const chords = [
+                    [261.63, 329.63, 392.00, 493.88], // Cmaj7
+                    [220.00, 261.63, 329.63, 392.00], // Am7
+                    [146.83, 174.61, 220.00, 261.63], // Dm7
+                    [196.00, 246.94, 293.66, 349.23]  // G7
+                ];
+                const cIdx = Math.floor(beat / 2) % 4;
+                const chord = chords[cIdx];
+                const bTime = beat % 2;
+                const env = Math.exp(-bTime * 1.5);
+                for (let f of chord) {
+                    s += (Math.sin(2 * Math.PI * f * t) * 0.12 + Math.sin(4 * Math.PI * f * t) * 0.04) * env;
+                }
+                if (Math.random() < 0.004) s += (Math.random() - 0.5) * 0.08;
+            } else if (presetId === 'dreampop') {
+                const beat = (t * (100 / 60)) % 8;
+                const notes = [349.23, 440, 523.25, 659.25, 523.25, 440, 392, 329.63];
+                const nIdx = Math.floor(beat * 2) % 8;
+                const f = notes[nIdx];
+                const bTime = (beat * 2) % 1;
+                const env = Math.exp(-bTime * 3.2);
+                s = Math.sin(2 * Math.PI * f * t) * 0.22 * env;
+                s += Math.sin(2 * Math.PI * (f * 1.5) * t) * 0.08 * env;
+                s += Math.sin(2 * Math.PI * (f * 0.5) * t) * 0.09;
+            } else if (presetId === 'acoustic') {
+                const beat = (t * (90 / 60)) % 8;
+                const notes = [164.81, 246.94, 329.63, 392.00, 493.88, 392.00, 329.63, 246.94];
+                const nIdx = Math.floor(beat * 2) % 8;
+                const f = notes[nIdx];
+                const bTime = (beat * 2) % 1;
+                const env = Math.exp(-bTime * 3.8);
+                s = (Math.sin(2 * Math.PI * f * t) + 0.5 * Math.sin(4 * Math.PI * f * t) + 0.25 * Math.sin(6 * Math.PI * f * t)) * 0.18 * env;
+            } else if (presetId === 'upbeat') {
+                const beat = (t * (120 / 60)) % 8;
+                const bTime = beat % 1;
+                const kickEnv = Math.exp(-bTime * 12);
+                const kick = Math.sin(2 * Math.PI * (120 * Math.exp(-bTime * 15)) * t) * 0.35 * kickEnv;
+                const bassNotes = [110, 110, 130.81, 146.83, 110, 110, 164.81, 146.83];
+                const bIdx = Math.floor(beat * 2) % 8;
+                const bf = bassNotes[bIdx];
+                const bassEnv = Math.exp(-((beat * 2) % 1) * 4);
+                const bass = (Math.sin(2 * Math.PI * bf * t) + 0.3 * Math.sin(4 * Math.PI * bf * t)) * 0.2 * bassEnv;
+                s = kick + bass;
+            } else { // chill piano
+                const beat = (t * (60 / 60)) % 8;
+                const chords = [
+                    [261.63, 329.63, 392.00], // C
+                    [329.63, 392.00, 493.88], // Em
+                    [220.00, 261.63, 329.63], // Am
+                    [174.61, 220.00, 261.63]  // F
+                ];
+                const cIdx = Math.floor(beat / 2) % 4;
+                const chord = chords[cIdx];
+                const bTime = beat % 2;
+                const env = Math.exp(-bTime * 1.0);
+                for (let f of chord) {
+                    s += Math.sin(2 * Math.PI * f * t) * 0.12 * env;
+                }
+            }
+            s = Math.max(-1, Math.min(1, s));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            offset += 2;
+        }
+
+        const dataUrl = bufferToWavDataUrl(buffer);
+        presetAudioCache[presetId] = dataUrl;
+        return dataUrl;
+    }
+
+    function getActiveAudioUrl() {
+        if (!state.music.enabled) return null;
+        if (state.music.sourceType === 'upload' && state.music.audioData) {
+            return state.music.audioData;
+        }
+        if (state.music.sourceType === 'url' && state.music.customAudioUrl) {
+            return state.music.customAudioUrl;
+        }
+        return generatePresetWav(state.music.presetId || 'lofi');
+    }
+
+    function syncAudioPlayerSource() {
+        const url = getActiveAudioUrl();
+        state.music.audioData = url;
+        if (postAudioPlayer) {
+            const wasPlaying = !postAudioPlayer.paused;
+            postAudioPlayer.src = url || '';
+            postAudioPlayer.loop = state.music.loop;
+            postAudioPlayer.volume = state.music.volume;
+            if (wasPlaying && url) {
+                postAudioPlayer.play().catch(() => {});
+            }
+        }
+    }
+
+    function toggleAudioPlayback(e) {
+        if (e) e.stopPropagation();
+        if (!state.music.enabled || !postAudioPlayer) return;
+
+        if (postAudioPlayer.paused) {
+            if (!postAudioPlayer.src || postAudioPlayer.src === window.location.href) {
+                syncAudioPlayerSource();
+            }
+            postAudioPlayer.play().then(() => {
+                showAudioToast(true);
+            }).catch((err) => {
+                console.warn('Audio playback blocked or failed:', err);
+            });
+        } else {
+            postAudioPlayer.pause();
+            showAudioToast(false);
+        }
+    }
+
+    let toastTimer = null;
+    function showAudioToast(isPlaying) {
+        if (!audioToast || !audioToastText) return;
+        const track = (state.music.title || 'Original Audio') + ' • ' + (state.music.artist || state.username);
+        audioToastText.textContent = isPlaying ? track : 'Audio muted';
+        const icon = audioToast.querySelector('i');
+        if (icon) {
+            icon.className = isPlaying ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+        }
+        audioToast.style.display = 'flex';
+        void audioToast.offsetWidth;
+        audioToast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            audioToast.classList.remove('show');
+            setTimeout(() => {
+                if (!audioToast.classList.contains('show')) {
+                    audioToast.style.display = 'none';
+                }
+            }, 250);
+        }, 1500);
+    }
+
+    function formatAudioTime(sec) {
+        if (!sec || isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function updateAudioUIState() {
+        const isPlaying = state.music.isPlaying;
+
+        // Sidebar Play Button Icon
+        if (sidebarPlayIcon) {
+            sidebarPlayIcon.className = isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+        }
+
+        // Header Music Bars vs Note
+        if (musicBars) {
+            musicBars.style.display = isPlaying ? 'inline-flex' : 'none';
+        }
+        const noteIcon = previewMusicLine ? previewMusicLine.querySelector('.music-icon-note') : null;
+        if (noteIcon) {
+            noteIcon.style.display = isPlaying ? 'none' : 'block';
+        }
+
+        // Post Media Speaker Icon
+        if (audioSpeakerBtn) {
+            const spkMuted = audioSpeakerBtn.querySelector('.audio-icon-muted');
+            const spkPlaying = audioSpeakerBtn.querySelector('.audio-icon-playing');
+            if (spkMuted) spkMuted.style.display = isPlaying ? 'none' : 'block';
+            if (spkPlaying) spkPlaying.style.display = isPlaying ? 'block' : 'none';
+        }
+    }
+
+    /* ========================================
+       Music & Audio Section Listeners
+       ======================================== */
+    let isSeekingAudio = false;
+
+    if (postAudioPlayer) {
+        postAudioPlayer.addEventListener('play', () => {
+            state.music.isPlaying = true;
+            updateAudioUIState();
+        });
+        postAudioPlayer.addEventListener('pause', () => {
+            state.music.isPlaying = false;
+            updateAudioUIState();
+        });
+        postAudioPlayer.addEventListener('timeupdate', () => {
+            if (!postAudioPlayer.duration) return;
+            const cur = postAudioPlayer.currentTime;
+            const dur = postAudioPlayer.duration;
+            if (audioCurrentTime) audioCurrentTime.textContent = formatAudioTime(cur);
+            if (audioTotalDuration) audioTotalDuration.textContent = formatAudioTime(dur);
+            if (audioSeekSlider && !isSeekingAudio) {
+                audioSeekSlider.value = (cur / dur) * 100;
+            }
+        });
+        postAudioPlayer.addEventListener('loadedmetadata', () => {
+            if (audioTotalDuration && postAudioPlayer.duration) {
+                audioTotalDuration.textContent = formatAudioTime(postAudioPlayer.duration);
+            }
+        });
+        postAudioPlayer.addEventListener('ended', () => {
+            if (!state.music.loop) {
+                state.music.isPlaying = false;
+                updateAudioUIState();
+            }
+        });
+    }
+
+    // Mini Player Play/Pause
+    if (sidebarPlayBtn) {
+        sidebarPlayBtn.addEventListener('click', toggleAudioPlayback);
+    }
+
+    // Post Speaker Button Click
+    if (audioSpeakerBtn) {
+        audioSpeakerBtn.addEventListener('click', (e) => toggleAudioPlayback(e));
+    }
+
+    // Post Header Music Tag Click
+    if (previewMusicLine) {
+        previewMusicLine.addEventListener('click', (e) => toggleAudioPlayback(e));
+    }
+
+    // Seek Slider
+    if (audioSeekSlider) {
+        audioSeekSlider.addEventListener('input', () => {
+            isSeekingAudio = true;
+            if (postAudioPlayer && postAudioPlayer.duration) {
+                const targetTime = (audioSeekSlider.value / 100) * postAudioPlayer.duration;
+                if (audioCurrentTime) audioCurrentTime.textContent = formatAudioTime(targetTime);
+            }
+        });
+        audioSeekSlider.addEventListener('change', () => {
+            if (postAudioPlayer && postAudioPlayer.duration) {
+                postAudioPlayer.currentTime = (audioSeekSlider.value / 100) * postAudioPlayer.duration;
+            }
+            isSeekingAudio = false;
+        });
+    }
+
+    // Volume Slider
+    if (audioVolSlider) {
+        audioVolSlider.addEventListener('input', () => {
+            const vol = parseInt(audioVolSlider.value, 10) / 100;
+            state.music.volume = vol;
+            if (postAudioPlayer) postAudioPlayer.volume = vol;
+            if (sidebarVolIcon) {
+                if (vol === 0) sidebarVolIcon.className = 'fa-solid fa-volume-xmark vol-icon';
+                else if (vol < 0.45) sidebarVolIcon.className = 'fa-solid fa-volume-low vol-icon';
+                else sidebarVolIcon.className = 'fa-solid fa-volume-high vol-icon';
+            }
+        });
+    }
+
+    // Sound On/Off Toggle
+    soundToggleBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            soundToggleBtns.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            const isSoundOn = btn.dataset.sound === 'on';
+            state.music.enabled = isSoundOn;
+            if (soundControlsGroup) soundControlsGroup.style.display = isSoundOn ? 'block' : 'none';
+            if (!isSoundOn && postAudioPlayer) {
+                postAudioPlayer.pause();
+            } else if (isSoundOn) {
+                syncAudioPlayerSource();
+            }
+            updatePreview();
+        });
+    });
+
+    // Track Title & Artist Inputs
+    if (trackTitleInput) {
+        trackTitleInput.addEventListener('input', () => {
+            state.music.title = trackTitleInput.value.trim() || 'Original Audio';
+            updatePreview();
+        });
+    }
+
+    if (artistNameInput) {
+        artistNameInput.addEventListener('input', () => {
+            state.music.artist = artistNameInput.value.trim() || state.username;
+            updatePreview();
+        });
+    }
+
+    // Source Tabs (Preset / Upload / Link)
+    audioSourceTabBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            audioSourceTabBtns.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            const source = btn.dataset.source;
+            state.music.sourceType = source;
+
+            if (presetTabContent) presetTabContent.style.display = source === 'preset' ? 'block' : 'none';
+            if (uploadTabContent) uploadTabContent.style.display = source === 'upload' ? 'block' : 'none';
+            if (urlTabContent) urlTabContent.style.display = source === 'url' ? 'block' : 'none';
+
+            syncAudioPlayerSource();
+            updatePreview();
+        });
+    });
+
+    // Preset Audio Pills
+    presetAudioPills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+            presetAudioPills.forEach((p) => p.classList.remove('active'));
+            pill.classList.add('active');
+            state.music.presetId = pill.dataset.presetId;
+            if (pill.dataset.title && trackTitleInput) {
+                trackTitleInput.value = pill.dataset.title;
+                state.music.title = pill.dataset.title;
+            }
+            if (pill.dataset.artist && artistNameInput) {
+                artistNameInput.value = pill.dataset.artist;
+                state.music.artist = pill.dataset.artist;
+            }
+            syncAudioPlayerSource();
+            updatePreview();
+        });
+    });
+
+    // Upload Audio File
+    if (audioDropZone) {
+        audioDropZone.addEventListener('click', () => {
+            if (audioFileInput) audioFileInput.click();
+        });
+
+        audioDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            audioDropZone.classList.add('dragover');
+        });
+
+        audioDropZone.addEventListener('dragleave', () => {
+            audioDropZone.classList.remove('dragover');
+        });
+
+        audioDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            audioDropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleAudioFileUpload(file);
+        });
+    }
+
+    if (audioFileInput) {
+        audioFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleAudioFileUpload(file);
+        });
+    }
+
+    function handleAudioFileUpload(file) {
+        if (!file.type.startsWith('audio/') && !/\.(mp3|wav|m4a|ogg|aac|webm)$/i.test(file.name)) {
+            alert('Please select a valid audio file (MP3, WAV, M4A, OGG, etc.)');
+            return;
+        }
+
+        readFileAsBase64(file, (dataUrl) => {
+            state.music.audioData = dataUrl;
+            state.music.uploadedFileName = file.name;
+
+            // Auto-populate track title from filename
+            const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+            if (trackTitleInput) {
+                trackTitleInput.value = cleanName;
+                state.music.title = cleanName;
+            }
+
+            if (audioFileName) audioFileName.textContent = file.name;
+            if (audioFileInfo) audioFileInfo.style.display = 'flex';
+            if (audioDropZone) audioDropZone.style.display = 'none';
+
+            syncAudioPlayerSource();
+            updatePreview();
+        });
+    }
+
+    if (removeAudioBtn) {
+        removeAudioBtn.addEventListener('click', () => {
+            state.music.audioData = null;
+            state.music.uploadedFileName = '';
+            if (audioFileInput) audioFileInput.value = '';
+            if (audioFileInfo) audioFileInfo.style.display = 'none';
+            if (audioDropZone) audioDropZone.style.display = 'block';
+            syncAudioPlayerSource();
+            updatePreview();
+        });
+    }
+
+    // Audio URL Input
+    if (audioUrlInput) {
+        audioUrlInput.addEventListener('input', () => {
+            state.music.customAudioUrl = audioUrlInput.value.trim();
+            syncAudioPlayerSource();
+            updatePreview();
+        });
+    }
+
+    // Display Toggles in Audio Section
+    if (showMusicHeaderToggle) {
+        showMusicHeaderToggle.addEventListener('change', () => {
+            state.music.showInHeader = showMusicHeaderToggle.checked;
+            state.visibility.music = showMusicHeaderToggle.checked;
+            if (showMusicToggle) showMusicToggle.checked = showMusicHeaderToggle.checked;
+            updatePreview();
+        });
+    }
+
+    if (showSpeakerIconToggle) {
+        showSpeakerIconToggle.addEventListener('change', () => {
+            state.music.showSpeakerBtn = showSpeakerIconToggle.checked;
+            state.visibility.speaker = showSpeakerIconToggle.checked;
+            if (showSpeakerToggle) showSpeakerToggle.checked = showSpeakerIconToggle.checked;
+            updatePreview();
+        });
+    }
+
+    if (loopAudioToggle) {
+        loopAudioToggle.addEventListener('change', () => {
+            state.music.loop = loopAudioToggle.checked;
+            if (postAudioPlayer) postAudioPlayer.loop = state.music.loop;
         });
     }
 
@@ -819,10 +1362,29 @@
             previewLocation.style.display = 'none';
         }
 
+        // Music Tag under Username
+        if (previewMusicLine) {
+            const showMusic = state.music.enabled && state.music.showInHeader && state.visibility.music && state.visibility.header;
+            previewMusicLine.style.display = showMusic ? 'flex' : 'none';
+            if (showMusic) {
+                const title = state.music.title || 'Original Audio';
+                const artist = state.music.artist || state.username;
+                if (previewMusicText) previewMusicText.textContent = `${title} • ${artist}`;
+            }
+        }
+
+        // Photo Speaker Button
+        if (audioSpeakerBtn) {
+            const showSpeaker = state.music.enabled && state.music.showSpeakerBtn && state.visibility.speaker;
+            audioSpeakerBtn.style.display = showSpeaker ? 'flex' : 'none';
+        }
+
         // Tagged People Badge
         if (previewTaggedBadge) {
             previewTaggedBadge.style.display = state.showTaggedBadge ? 'flex' : 'none';
         }
+
+        updateAudioUIState();
 
         // Images & Carousel
         updateImagePreview();
@@ -1067,7 +1629,7 @@
     // Double-tap Image to Like
     let lastTapTime = 0;
     igImageContainer.addEventListener('click', (e) => {
-        if (e.target.closest('.carousel-arrow')) return;
+        if (e.target.closest('.carousel-arrow') || e.target.closest('#audioSpeakerBtn')) return;
         const now = Date.now();
         if (now - lastTapTime < 340) {
             if (!state.liked) {
@@ -1204,6 +1766,49 @@
             ? `<div class="location">${escapeHtml(state.location)}</div>`
             : '';
 
+        // Music Tag HTML
+        const musicLineHTML = (state.music.enabled && state.music.showInHeader && state.visibility.music)
+            ? `<div class="music-line" id="headerMusicLine" title="Toggle audio">
+                <div class="music-icon-wrap">
+                    <svg class="music-note" viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                    <div class="music-bars" id="exportMusicBars" style="display:none;">
+                        <span class="bar bar-1"></span>
+                        <span class="bar bar-2"></span>
+                        <span class="bar bar-3"></span>
+                    </div>
+                </div>
+                <span class="music-text">${escapeHtml(state.music.title || 'Original Audio')} • ${escapeHtml(state.music.artist || state.username)}</span>
+            </div>`
+            : '';
+
+        // Speaker Button & Toast HTML on Media
+        const speakerBtnHTML = (state.music.enabled && state.music.showSpeakerBtn && state.visibility.speaker)
+            ? `<button class="audio-btn" id="audioToggleBtn" title="Toggle sound" aria-label="Toggle sound">
+                <svg id="spkMuted" viewBox="0 0 24 24" width="13" height="13" fill="#ffffff">
+                    <path d="M3.63 3.63a.996.996 0 000 1.41L7.29 8.7 7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.14-.58.53-.58.92 0 .63.6 1.09 1.21.87.81-.3 1.55-.72 2.21-1.23l1.8 1.8a.996.996 0 101.41-1.41L5.05 3.63a.996.996 0 00-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zm-7-8l-1.88 1.88L12 7.76zm4.5 8A4.5 4.5 0 0014 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"/>
+                </svg>
+                <svg id="spkPlaying" viewBox="0 0 24 24" width="13" height="13" fill="#ffffff" style="display:none;">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+            </button>
+            <div class="audio-toast" id="audioToast" style="display:none;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="#38bdf8" style="vertical-align:middle;margin-right:6px;">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+                <span id="toastText">${escapeHtml((state.music.title || 'Original Audio') + ' • ' + (state.music.artist || state.username))}</span>
+            </div>`
+            : '';
+
+        // Standalone Audio Source for Export
+        const exportAudioSource = state.music.enabled
+            ? (state.music.audioData || getActiveAudioUrl() || '')
+            : '';
+        const audioTagHTML = state.music.enabled && exportAudioSource
+            ? `<audio id="postAudio"${state.music.loop ? ' loop' : ''} preload="auto" src="${exportAudioSource}"></audio>`
+            : '';
+
         // Story ring class
         const storyRingClass = state.storyRing ? ' has-story-ring' : '';
 
@@ -1227,6 +1832,7 @@
                     ${followHTML}
                 </div>
                 ${locationHTML}
+                ${musicLineHTML}
             </div>
         </div>
         <div class="menu-dots" title="More options">
@@ -1405,6 +2011,21 @@ body{
 .follow-btn{font-size:13.5px;font-weight:600;color:#0095f6;cursor:pointer;}
 .follow-btn.following{color:#8e8e8e;font-weight:500;}
 .location{font-size:11.5px;color:${isDark ? '#f5f5f5' : '#262626'};line-height:1.2;}
+.music-line{display:flex;align-items:center;gap:4px;font-size:11.5px;color:${isDark ? '#f5f5f5' : '#262626'};line-height:1.2;cursor:pointer;margin-top:1px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:none;}
+.music-line:hover{opacity:0.82;}
+.music-icon-wrap{display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;flex-shrink:0;color:currentColor;}
+.music-bars{display:inline-flex;align-items:flex-end;gap:1.5px;height:10px;color:currentColor;}
+.music-bars .bar{width:2px;background-color:currentColor;border-radius:1px;}
+.music-bars .bar-1{height:3px;animation:expEqualizer 0.5s ease-in-out infinite alternate;}
+.music-bars .bar-2{height:9px;animation:expEqualizer 0.7s ease-in-out 0.15s infinite alternate;}
+.music-bars .bar-3{height:5px;animation:expEqualizer 0.6s ease-in-out 0.3s infinite alternate;}
+@keyframes expEqualizer{0%{height:2px;}100%{height:10px;}}
+.music-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.audio-btn{position:absolute;bottom:12px;right:12px;width:26px;height:26px;border-radius:50%;background:rgba(18,18,18,0.78);border:none;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;z-index:4;backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,0.35);transition:transform 0.15s ease,background 0.15s ease;}
+.audio-btn:hover{transform:scale(1.1);background:rgba(18,18,18,0.92);}
+.audio-btn:active{transform:scale(0.92);}
+.audio-toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);background:rgba(18,18,18,0.88);color:#fff;font-size:12px;font-weight:600;padding:8px 14px;border-radius:20px;backdrop-filter:blur(10px);z-index:9;display:flex;align-items:center;gap:8px;pointer-events:none;opacity:0;transition:opacity 0.22s ease,transform 0.22s ease;box-shadow:0 4px 18px rgba(0,0,0,0.45);letter-spacing:0.2px;max-width:85%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.audio-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .menu-dots{cursor:pointer;color:${isDark ? '#f5f5f5' : '#262626'};padding:4px;display:flex;align-items:center;}
 /* Media Container */
 .media-container{
@@ -1622,6 +2243,7 @@ body{
 
         ${counterBadgeHTML}
         ${taggedBadgeHTML}
+        ${speakerBtnHTML}
 
         ${isCarousel ? `
         <button class="nav-arrow nav-arrow-left" id="arrowLeft" style="display:none;" aria-label="Previous image">&#10094;</button>
@@ -1642,6 +2264,7 @@ body{
     ${commentsListHTML}
     ${timeHTML}
     ${addCommentBoxHTML}
+    ${audioTagHTML}
 </div>
 
 <script>
@@ -1696,7 +2319,7 @@ body{
     var lastTap = 0;
     if(mediaContainer){
         mediaContainer.addEventListener('click', function(e){
-            if(e.target.closest('.nav-arrow')) return;
+            if(e.target.closest('.nav-arrow') || e.target.closest('.audio-btn')) return;
             var now = Date.now();
             if(now - lastTap < 340){
                 if(!liked) toggleHeart();
@@ -1709,6 +2332,56 @@ body{
             lastTap = now;
         });
     }
+
+    // Audio Playback Controls
+    var audio = document.getElementById('postAudio');
+    var audioBtn = document.getElementById('audioToggleBtn');
+    var spkMuted = document.getElementById('spkMuted');
+    var spkPlaying = document.getElementById('spkPlaying');
+    var headerMusicLine = document.getElementById('headerMusicLine');
+    var musicBars = document.getElementById('exportMusicBars');
+    var musicNote = headerMusicLine ? headerMusicLine.querySelector('.music-note') : null;
+    var audioToast = document.getElementById('audioToast');
+    var toastText = document.getElementById('toastText');
+    var toastTimer = null;
+
+    function showToast(isPlaying){
+        if(!audioToast) return;
+        if(toastText) toastText.textContent = isPlaying ? ${JSON.stringify((state.music.title || 'Original Audio') + ' • ' + (state.music.artist || state.username))} : 'Audio muted';
+        audioToast.style.display = 'flex';
+        void audioToast.offsetWidth;
+        audioToast.classList.add('show');
+        if(toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function(){
+            audioToast.classList.remove('show');
+            setTimeout(function(){ if(!audioToast.classList.contains('show')) audioToast.style.display = 'none'; }, 220);
+        }, 1500);
+    }
+
+    function toggleAudio(e){
+        if(e) e.stopPropagation();
+        if(!audio) return;
+        if(audio.paused){
+            audio.volume = ${state.music.volume};
+            audio.play().then(function(){
+                if(spkMuted) spkMuted.style.display = 'none';
+                if(spkPlaying) spkPlaying.style.display = 'block';
+                if(musicBars) musicBars.style.display = 'inline-flex';
+                if(musicNote) musicNote.style.display = 'none';
+                showToast(true);
+            }).catch(function(err){ console.warn(err); });
+        } else {
+            audio.pause();
+            if(spkMuted) spkMuted.style.display = 'block';
+            if(spkPlaying) spkPlaying.style.display = 'none';
+            if(musicBars) musicBars.style.display = 'none';
+            if(musicNote) musicNote.style.display = 'block';
+            showToast(false);
+        }
+    }
+
+    if(audioBtn) audioBtn.addEventListener('click', toggleAudio);
+    if(headerMusicLine) headerMusicLine.addEventListener('click', toggleAudio);
 
     // Expand Caption
     if(captionMore && captionEl){
@@ -1892,6 +2565,7 @@ body{
     renderThumbnails();
     renderCommentsEditor();
     charCount.textContent = state.caption.length;
+    syncAudioPlayerSource();
     updatePreview();
 
 })();
