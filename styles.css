@@ -704,15 +704,27 @@ html, body {
 }
 
 /* Comments List in Editor */
+.editor-section-hint {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
 .comment-row {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 12px;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 10px;
+    transition: border-color var(--transition);
+}
+
+.comment-row:hover {
+    border-color: var(--border-color-hover);
 }
 
 .comment-row-top {
@@ -721,14 +733,63 @@ html, body {
     gap: 8px;
 }
 
+.comment-avatar-picker {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.comment-avatar-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    border: 1.5px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-avatar-preview img,
+.comment-avatar-preview svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.comment-avatar-upload-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.comment-avatar-picker:hover .comment-avatar-upload-overlay {
+    opacity: 1;
+}
+
 .comment-row .comment-user {
     flex: 1;
+    min-width: 0;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 6px 9px;
     color: var(--text-primary);
     font-size: 12.5px;
+    font-weight: 500;
     outline: none;
 }
 
@@ -743,7 +804,8 @@ html, body {
     outline: none;
     line-height: 1.4;
     resize: vertical;
-    min-height: 48px;
+    min-height: 44px;
+    font-family: inherit;
 }
 
 .comment-row input:focus,
@@ -754,15 +816,38 @@ html, body {
 .comment-verified-label {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     font-size: 11.5px;
     color: var(--text-secondary);
     cursor: pointer;
     user-select: none;
+    flex-shrink: 0;
 }
 
 .comment-verified-label input {
     accent-color: var(--ig-blue);
+    cursor: pointer;
+}
+
+.comment-remove-avatar-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.comment-remove-avatar-btn:hover {
+    background: var(--bg-surface-hover);
+    color: #ff3040;
+    border-color: #ff3040;
 }
 
 .remove-comment-btn {
@@ -1303,22 +1388,44 @@ html, body {
 .ig-view-comments {
     font-size: 13.5px;
     color: var(--card-text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     cursor: pointer;
 }
 
 .ig-comment {
     font-size: 13.5px;
     color: var(--card-text);
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     line-height: 1.35;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.ig-comment-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--card-border);
+    margin-top: 1px;
+}
+
+.ig-comment-avatar img,
+.ig-comment-avatar svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ig-comment-body {
+    flex: 1;
+    min-width: 0;
 }
 
 .ig-comment-content {
-    flex: 1;
     white-space: pre-wrap;
     word-break: break-word;
 }
@@ -1339,7 +1446,14 @@ html, body {
     color: var(--card-text-muted);
     font-size: 11px;
     cursor: pointer;
-    padding-left: 8px;
+    padding-left: 6px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    transition: transform var(--transition);
+}
+
+.ig-comment-heart:hover {
+    transform: scale(1.15);
 }
 
 .ig-comment-heart.liked {

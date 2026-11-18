@@ -224,18 +224,46 @@ body{
 .more-link{color:#8e8e8e;cursor:pointer;margin-left:4px;}
 .ig-tag{color:#00376b;cursor:pointer;}
 .comments-list{padding:0 14px 4px;}
-.view-comments{font-size:13.5px;color:#8e8e8e;margin-bottom:4px;cursor:pointer;}
+.view-comments{font-size:13.5px;color:#8e8e8e;margin-bottom:6px;cursor:pointer;}
 .comment{
     font-size:13.5px;
     line-height:1.35;
-    margin-bottom:4px;
+    margin-bottom:8px;
     display:flex;
-    justify-content:space-between;
-    align-items:baseline;
+    align-items:flex-start;
+    gap:10px;
 }
-.comment .user{font-weight:600;margin-right:5px;}
-.comment-content{white-space:pre-wrap;word-break:break-word;flex:1;}
-.comment-heart{font-size:11px;cursor:pointer;padding-left:8px;user-select:none;}
+.comment-avatar{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    overflow:hidden;
+    flex-shrink:0;
+    background:#efefef;
+    margin-top:1px;
+}
+.comment-avatar img,
+.comment-avatar svg{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.comment-body{
+    flex:1;
+    min-width:0;
+}
+.comment-content{
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+.comment .user{font-weight:600;margin-right:4px;}
+.comment-verified{
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:4px;
+}
+.comment-heart{font-size:11px;cursor:pointer;padding-left:6px;user-select:none;flex-shrink:0;margin-top:3px;}
 .time{padding:4px 14px 12px;font-size:10px;color:#8e8e8e;text-transform:uppercase;letter-spacing:0.3px;}
 /* Add Comment Input */
 .add-comment-box{
@@ -455,17 +483,28 @@ Swipe to see the magic 👉
     <div class="comments-list" id="commentsList">
         <div class="view-comments">View all 2 comments</div>
         <div class="comment">
-            <div class="comment-content">
-                <span class="user">alex_wanderlust</span>
-                <span class="comment-text">These colors are unreal! 🔥
+            <div class="comment-avatar">
+                <svg viewBox="0 0 120 120" width="100%" height="100%"><defs><linearGradient id="g_alex" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7e5f"/><stop offset="100%" stop-color="#feb47b"/></linearGradient></defs><circle cx="60" cy="60" r="60" fill="url(#g_alex)"/><circle cx="60" cy="46" r="21" fill="#ffffff"/><path d="M24 104 C24 82 40 72 60 72 C80 72 96 82 96 104 Z" fill="#ffffff"/><rect x="46" y="42" width="12" height="7" rx="2" fill="#ff7e5f"/><rect x="62" y="42" width="12" height="7" rx="2" fill="#ff7e5f"/><line x1="58" y1="45" x2="62" y2="45" stroke="#ff7e5f" stroke-width="2"/></svg>
+            </div>
+            <div class="comment-body">
+                <div class="comment-content">
+                    <span class="user">alex_wanderlust</span>
+                    <span class="comment-text">These colors are unreal! 🔥
 Where was slide 2 taken?</span>
+                </div>
             </div>
             <span class="comment-heart" onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</span>
         </div>
         <div class="comment">
-            <div class="comment-content">
-                <span class="user">travelgram</span>
-                <span class="comment-text">Bucket list destination for sure 😍</span>
+            <div class="comment-avatar">
+                <svg viewBox="0 0 120 120" width="100%" height="100%"><defs><linearGradient id="g_tg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00b4db"/><stop offset="100%" stop-color="#0083b0"/></linearGradient></defs><circle cx="60" cy="60" r="60" fill="url(#g_tg)"/><circle cx="60" cy="46" r="21" fill="#ffffff"/><path d="M24 104 C24 82 40 72 60 72 C80 72 96 82 96 104 Z" fill="#ffffff"/><circle cx="78" cy="82" r="14" fill="#ffffff"/><circle cx="78" cy="82" r="11" fill="#0083b0"/><circle cx="78" cy="82" r="5" fill="#ffffff"/></svg>
+            </div>
+            <div class="comment-body">
+                <div class="comment-content">
+                    <span class="user">travelgram</span>
+                    <span class="comment-verified"><svg viewBox="0 0 40 40" width="12" height="12" style="vertical-align:middle;display:inline-block;"><path fill="#0095f6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v6.354h6.234L14.638 40l5.36-3.094L25.358 40l2.972-5.15h6.234v-6.354L40 25.359 36.906 20 40 14.641l-5.436-3.137V5.15h-6.234L25.358 0l-5.36 3.094zM18 27.27L10.455 19.1l2.636-2.726L18 21.727l8.91-9.454 2.636 2.726L18 27.27z"/></svg></span>
+                    <span class="comment-text">Bucket list destination for sure 😍</span>
+                </div>
             </div>
             <span class="comment-heart" onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</span>
         </div>
@@ -647,7 +686,8 @@ Where was slide 2 taken?</span>
         if(!text) return;
         var div = document.createElement('div');
         div.className = 'comment';
-        div.innerHTML = '<div class="comment-content"><span class="user">you</span> <span class="comment-text">' + text.replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</span></div><span class="comment-heart" onclick="this.classList.toggle(\'liked\');this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</span>';
+        var defaultSvg = '<svg viewBox="0 0 120 120" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="60" fill="#E1E2E6"/><circle cx="60" cy="46" r="22" fill="#999CA0"/><path d="M22 104C22 84 38 74 60 74C82 74 98 84 98 104" fill="#999CA0"/></svg>';
+        div.innerHTML = '<div class="comment-avatar">' + defaultSvg + '</div><div class="comment-body"><div class="comment-content"><span class="user">you</span> <span class="comment-text">' + text.replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</span></div></div><span class="comment-heart" onclick="this.classList.toggle(\'liked\');this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</span>';
         commentsList.appendChild(div);
         commentInput.value = '';
     }

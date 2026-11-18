@@ -14,6 +14,92 @@
         <path d="M22 104C22 84 38 74 60 74C82 74 98 84 98 104" fill="#999CA0"/>
     </svg>`;
 
+    const AVATAR_PALETTES = [
+        ['#ff7e5f', '#feb47b'], // Sunset Coral
+        ['#6a11cb', '#2575fc'], // Royal Purple / Blue
+        ['#00c6ff', '#0072ff'], // Ocean Cyan
+        ['#11998e', '#38ef7d'], // Emerald Mint
+        ['#f857a6', '#ff5858'], // Pink Punch
+        ['#f7971e', '#ffd200'], // Golden Honey
+        ['#833ab4', '#fd1d1d'], // IG Gradient
+        ['#30cfd0', '#330867']  // Deep Turquoise
+    ];
+
+    function getPaletteForUsername(name) {
+        if (!name) return AVATAR_PALETTES[0];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = (hash << 5) - hash + name.charCodeAt(i);
+            hash |= 0;
+        }
+        const idx = Math.abs(hash) % AVATAR_PALETTES.length;
+        return AVATAR_PALETTES[idx];
+    }
+
+    function createAvatarSvg(type, color1, color2) {
+        let innerElements = '';
+        if (type === 'adventurer') {
+            innerElements = `
+                <circle cx="60" cy="46" r="21" fill="#ffffff"/>
+                <path d="M24 104 C24 82 40 72 60 72 C80 72 96 82 96 104 Z" fill="#ffffff"/>
+                <rect x="46" y="42" width="12" height="7" rx="2" fill="${color1}"/>
+                <rect x="62" y="42" width="12" height="7" rx="2" fill="${color1}"/>
+                <line x1="58" y1="45" x2="62" y2="45" stroke="${color1}" stroke-width="2"/>
+            `;
+        } else if (type === 'camera') {
+            innerElements = `
+                <circle cx="60" cy="46" r="21" fill="#ffffff"/>
+                <path d="M24 104 C24 82 40 72 60 72 C80 72 96 82 96 104 Z" fill="#ffffff"/>
+                <circle cx="78" cy="82" r="14" fill="#ffffff"/>
+                <circle cx="78" cy="82" r="11" fill="${color2}"/>
+                <circle cx="78" cy="82" r="5" fill="#ffffff"/>
+            `;
+        } else {
+            innerElements = `
+                <circle cx="60" cy="46" r="22" fill="#ffffff"/>
+                <path d="M22 104 C22 83 38 73 60 73 C82 73 98 83 98 104 Z" fill="#ffffff"/>
+            `;
+        }
+
+        const gradId = 'g_' + type + '_' + color1.replace('#', '');
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+            <defs>
+                <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="${color1}"/>
+                    <stop offset="100%" stop-color="${color2}"/>
+                </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="60" fill="url(#${gradId})"/>
+            ${innerElements}
+        </svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function getDefaultCommentAvatar(username) {
+        const [c1, c2] = getPaletteForUsername(username);
+        const initial = (username && username.trim().length > 0)
+            ? username.trim().charAt(0).toUpperCase()
+            : '?';
+        const gradId = 'g_init_' + Math.abs((username || '').split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0));
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+            <defs>
+                <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="${c1}"/>
+                    <stop offset="100%" stop-color="${c2}"/>
+                </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="60" fill="url(#${gradId})"/>
+            <text x="60" y="75" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#ffffff" text-anchor="middle">${initial}</text>
+        </svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function getCommentAvatarSrc(comment) {
+        if (!comment) return defaultAvatarSvg;
+        if (comment.avatar) return comment.avatar;
+        return getDefaultCommentAvatar(comment.user);
+    }
+
     function createSampleImage(text, subtext, gradientColors) {
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
             <defs>
@@ -70,6 +156,7 @@
             likes: true,
             caption: true,
             comments: true,
+            commentAvatars: true,
             time: true,
             commentBox: true,
             music: true,
@@ -102,8 +189,18 @@
         postDateTime: toLocalIsoString(new Date(Date.now() - 2 * 60 * 60 * 1000)), // 2 hours ago
         manualTimeText: '3 hours ago',
         comments: [
-            { user: 'alex_wanderlust', text: 'These colors are unreal! 🔥\nWhere was slide 2 taken?' },
-            { user: 'travelgram', text: 'Bucket list destination for sure 😍' }
+            {
+                user: 'alex_wanderlust',
+                text: 'These colors are unreal! 🔥\nWhere was slide 2 taken?',
+                avatar: createAvatarSvg('adventurer', '#ff7e5f', '#feb47b'),
+                verified: false
+            },
+            {
+                user: 'travelgram',
+                text: 'Bucket list destination for sure 😍',
+                avatar: createAvatarSvg('camera', '#00b4db', '#0083b0'),
+                verified: true
+            }
         ],
         carouselIndex: 0,
         liked: false,
@@ -140,6 +237,7 @@
     const showLikesToggle = $('#showLikesToggle');
     const showCaptionToggle = $('#showCaptionToggle');
     const showCommentsToggle = $('#showCommentsToggle');
+    const showCommentAvatarsToggle = $('#showCommentAvatarsToggle');
     const showTimeToggle = $('#showTimeToggle');
     const showMusicToggle = $('#showMusicToggle');
     const showSpeakerToggle = $('#showSpeakerToggle');
@@ -424,6 +522,13 @@
         showCommentsToggle.addEventListener('change', () => {
             state.visibility.comments = showCommentsToggle.checked;
             updatePreview();
+        });
+    }
+
+    if (showCommentAvatarsToggle) {
+        showCommentAvatarsToggle.addEventListener('change', () => {
+            state.visibility.commentAvatars = showCommentAvatarsToggle.checked;
+            updateCommentsPreview();
         });
     }
 
@@ -1242,7 +1347,13 @@
        Comments Editor Listeners
        ======================================== */
     addCommentBtn.addEventListener('click', () => {
-        state.comments.push({ user: 'friend', text: 'Love this shot! ✨' });
+        const nextNum = state.comments.length + 1;
+        state.comments.push({
+            user: 'wanderer_' + nextNum,
+            text: 'Love this shot! ✨',
+            avatar: null,
+            verified: false
+        });
         renderCommentsEditor();
         updatePreview();
     });
@@ -1255,23 +1366,86 @@
             const row = document.createElement('div');
             row.className = 'comment-row';
             row.dataset.index = i;
+
+            const avatarSrc = getCommentAvatarSrc(comment);
+
             row.innerHTML = `
-                <input type="text" class="comment-user" placeholder="username" value="${escapeHtml(comment.user)}">
-                <input type="text" class="comment-text" placeholder="comment" value="${escapeHtml(comment.text)}">
-                <button class="remove-comment-btn" title="Remove comment"><i class="fa-solid fa-xmark"></i></button>
+                <div class="comment-row-top">
+                    <div class="comment-avatar-picker" title="Click to upload custom account photo">
+                        <div class="comment-avatar-preview">
+                            <img src="${avatarSrc}" alt="${escapeHtml(comment.user)}">
+                        </div>
+                        <div class="comment-avatar-upload-overlay" title="Upload account photo">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <input type="file" class="comment-avatar-input" accept="image/*" hidden>
+                    </div>
+                    <input type="text" class="comment-user" placeholder="username" value="${escapeHtml(comment.user)}">
+                    <label class="comment-verified-label" title="Toggle verified badge">
+                        <input type="checkbox" class="comment-verified-check" ${comment.verified ? 'checked' : ''}>
+                        <span><i class="fa-solid fa-certificate" style="color:var(--ig-blue);"></i></span>
+                    </label>
+                    ${comment.avatar ? `<button type="button" class="comment-remove-avatar-btn" title="Reset to default photo"><i class="fa-solid fa-rotate-left"></i></button>` : ''}
+                    <button type="button" class="remove-comment-btn" title="Remove comment"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="comment-row-bottom">
+                    <textarea class="comment-text" placeholder="Write a comment...">${escapeHtml(comment.text)}</textarea>
+                </div>
             `;
 
-            row.querySelector('.comment-user').addEventListener('input', (e) => {
+            const avatarPicker = row.querySelector('.comment-avatar-picker');
+            const avatarInput = row.querySelector('.comment-avatar-input');
+            const removeAvatarBtn = row.querySelector('.comment-remove-avatar-btn');
+            const userInput = row.querySelector('.comment-user');
+            const textInput = row.querySelector('.comment-text');
+            const verifiedCheck = row.querySelector('.comment-verified-check');
+            const removeBtn = row.querySelector('.remove-comment-btn');
+
+            avatarPicker.addEventListener('click', () => {
+                avatarInput.click();
+            });
+
+            avatarInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                readFileAsBase64(file, (data) => {
+                    state.comments[i].avatar = data;
+                    renderCommentsEditor();
+                    updateCommentsPreview();
+                });
+            });
+
+            if (removeAvatarBtn) {
+                removeAvatarBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    state.comments[i].avatar = null;
+                    renderCommentsEditor();
+                    updateCommentsPreview();
+                });
+            }
+
+            userInput.addEventListener('input', (e) => {
                 state.comments[i].user = e.target.value;
+                if (!state.comments[i].avatar) {
+                    const previewImg = row.querySelector('.comment-avatar-preview img');
+                    if (previewImg) {
+                        previewImg.src = getCommentAvatarSrc(state.comments[i]);
+                    }
+                }
                 updateCommentsPreview();
             });
 
-            row.querySelector('.comment-text').addEventListener('input', (e) => {
+            textInput.addEventListener('input', (e) => {
                 state.comments[i].text = e.target.value;
                 updateCommentsPreview();
             });
 
-            row.querySelector('.remove-comment-btn').addEventListener('click', () => {
+            verifiedCheck.addEventListener('change', (e) => {
+                state.comments[i].verified = e.target.checked;
+                updateCommentsPreview();
+            });
+
+            removeBtn.addEventListener('click', () => {
                 state.comments.splice(i, 1);
                 renderCommentsEditor();
                 updateCommentsPreview();
@@ -1293,7 +1467,12 @@
     function submitQuickComment() {
         const text = quickCommentInput.value.trim();
         if (!text) return;
-        state.comments.push({ user: 'you', text: text });
+        state.comments.push({
+            user: state.username || 'you',
+            text: text,
+            avatar: state.profilePic || null,
+            verified: state.verified || false
+        });
         quickCommentInput.value = '';
         renderCommentsEditor();
         updateCommentsPreview();
@@ -1333,6 +1512,15 @@
         } else {
             previewProfilePic.innerHTML = defaultAvatarSvg;
             profilePicPreview.innerHTML = defaultAvatarSvg;
+        }
+
+        const quickMiniAvatar = previewCommentBox ? previewCommentBox.querySelector('.ig-mini-avatar') : null;
+        if (quickMiniAvatar) {
+            if (state.profilePic) {
+                quickMiniAvatar.innerHTML = `<img src="${state.profilePic}" alt="${escapeHtml(state.username || 'You')}">`;
+            } else {
+                quickMiniAvatar.innerHTML = defaultAvatarSvg;
+            }
         }
 
         // Username
@@ -1564,12 +1752,30 @@
         displayComments.forEach((c) => {
             const div = document.createElement('div');
             div.className = 'ig-comment';
-            div.innerHTML = `
-                <div class="ig-comment-content">
-                    <span class="ig-comment-user">${escapeHtml(c.user)}</span>
-                    <span class="ig-comment-text">${formatTextWithTags(c.text)}</span>
+
+            const avatarSrc = getCommentAvatarSrc(c);
+            const avatarHtml = state.visibility.commentAvatars !== false ? `
+                <div class="ig-comment-avatar" title="${escapeHtml(c.user)}">
+                    <img src="${avatarSrc}" alt="${escapeHtml(c.user)}">
                 </div>
-                <div class="ig-comment-heart">
+            ` : '';
+
+            const verifiedHtml = c.verified ? `
+                <span class="ig-comment-verified" title="Verified">
+                    <svg viewBox="0 0 40 40" width="12" height="12"><path fill="#0095f6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v6.354h6.234L14.638 40l5.36-3.094L25.358 40l2.972-5.15h6.234v-6.354L40 25.359 36.906 20 40 14.641l-5.436-3.137V5.15h-6.234L25.358 0l-5.36 3.094zM18 27.27L10.455 19.1l2.636-2.726L18 21.727l8.91-9.454 2.636 2.726L18 27.27z"/></svg>
+                </span>
+            ` : '';
+
+            div.innerHTML = `
+                ${avatarHtml}
+                <div class="ig-comment-body">
+                    <div class="ig-comment-content">
+                        <span class="ig-comment-user">${escapeHtml(c.user)}</span>
+                        ${verifiedHtml}
+                        <span class="ig-comment-text">${formatTextWithTags(c.text)}</span>
+                    </div>
+                </div>
+                <div class="ig-comment-heart" title="Like comment">
                     <i class="fa-regular fa-heart"></i>
                 </div>
             `;
@@ -1898,10 +2104,22 @@
                 innerComments += `<div class="view-comments">${escapeHtml(viewAllText)}</div>`;
             }
             validComments.forEach((c) => {
+                const avatarSrc = getCommentAvatarSrc(c);
+                const avatarHtml = state.visibility.commentAvatars !== false
+                    ? `<div class="comment-avatar"><img src="${avatarSrc}" alt="${escapeHtml(c.user)}"></div>`
+                    : '';
+                const verifiedHtml = c.verified
+                    ? `<span class="comment-verified"><svg viewBox="0 0 40 40" width="12" height="12" style="vertical-align:middle;display:inline-block;"><path fill="#0095f6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v6.354h6.234L14.638 40l5.36-3.094L25.358 40l2.972-5.15h6.234v-6.354L40 25.359 36.906 20 40 14.641l-5.436-3.137V5.15h-6.234L25.358 0l-5.36 3.094zM18 27.27L10.455 19.1l2.636-2.726L18 21.727l8.91-9.454 2.636 2.726L18 27.27z"/></svg></span>`
+                    : '';
+
                 innerComments += `<div class="comment">
-                    <div class="comment-content">
-                        <span class="user">${escapeHtml(c.user)}</span>
-                        <span class="comment-text">${formatTextWithTags(c.text)}</span>
+                    ${avatarHtml}
+                    <div class="comment-body">
+                        <div class="comment-content">
+                            <span class="user">${escapeHtml(c.user)}</span>
+                            ${verifiedHtml}
+                            <span class="comment-text">${formatTextWithTags(c.text)}</span>
+                        </div>
                     </div>
                     <span class="comment-heart" onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</span>
                 </div>`;
@@ -1927,10 +2145,14 @@
     <div class="time" id="postTimestamp"${postDateIso ? ` data-post-date="${postDateIso}"` : ''}>${initialTimeText}</div>` : '';
 
         // Add Comment Box HTML
+        const addCommentBoxAvatarHtml = state.profilePic
+            ? `<img src="${state.profilePic}" alt="${escapeHtml(state.username || 'You')}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+            : defaultAvatarSvg;
+
         const addCommentBoxHTML = (state.showCommentBox && state.visibility.commentBox)
             ? `<!-- Add Comment Box -->
     <div class="add-comment-box">
-        <div class="mini-avatar">${defaultAvatarSvg}</div>
+        <div class="mini-avatar">${addCommentBoxAvatarHtml}</div>
         <input type="text" class="comment-input" id="newCommentInput" placeholder="Add a comment...">
         <button class="post-comment-btn" id="postCommentBtn">Post</button>
     </div>`
@@ -2176,18 +2398,46 @@ body{
 .more-link{color:#8e8e8e;cursor:pointer;margin-left:4px;}
 .ig-tag{color:${isDark ? '#e0f1ff' : '#00376b'};cursor:pointer;}
 .comments-list{padding:0 14px 4px;}
-.view-comments{font-size:13.5px;color:#8e8e8e;margin-bottom:4px;cursor:pointer;}
+.view-comments{font-size:13.5px;color:#8e8e8e;margin-bottom:6px;cursor:pointer;}
 .comment{
     font-size:13.5px;
     line-height:1.35;
-    margin-bottom:4px;
+    margin-bottom:8px;
     display:flex;
-    justify-content:space-between;
-    align-items:baseline;
+    align-items:flex-start;
+    gap:10px;
 }
-.comment .user{font-weight:600;margin-right:5px;}
-.comment-content{white-space:pre-wrap;word-break:break-word;flex:1;}
-.comment-heart{font-size:11px;cursor:pointer;padding-left:8px;user-select:none;}
+.comment-avatar{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    overflow:hidden;
+    flex-shrink:0;
+    background:${isDark ? '#262626' : '#efefef'};
+    margin-top:1px;
+}
+.comment-avatar img,
+.comment-avatar svg{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.comment-body{
+    flex:1;
+    min-width:0;
+}
+.comment-content{
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+.comment .user{font-weight:600;margin-right:4px;}
+.comment-verified{
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:4px;
+}
+.comment-heart{font-size:11px;cursor:pointer;padding-left:6px;user-select:none;flex-shrink:0;margin-top:3px;}
 .time{padding:4px 14px 12px;font-size:10px;color:#8e8e8e;text-transform:uppercase;letter-spacing:0.3px;}
 /* Add Comment Input */
 .add-comment-box{
@@ -2208,7 +2458,8 @@ body{
     flex-shrink:0;
     overflow:hidden;
 }
-.mini-avatar svg{width:100%;height:100%;display:block;}
+.mini-avatar img,
+.mini-avatar svg{width:100%;height:100%;object-fit:cover;display:block;}
 .comment-input{
     flex:1;
     background:none;
@@ -2480,7 +2731,10 @@ body{
         if(!text) return;
         var div = document.createElement('div');
         div.className = 'comment';
-        div.innerHTML = '<div class="comment-content"><span class="user">you</span> <span class="comment-text">' + text.replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</span></div><span class="comment-heart" onclick="this.classList.toggle(\\'liked\\');this.textContent=this.classList.contains(\\'liked\\')?\\'❤️\\':\\'🤍\\'">🤍</span>';
+        var avatarSection = ${state.visibility.commentAvatars !== false ? `'<div class="comment-avatar">' + ${JSON.stringify(state.profilePic ? `<img src="${state.profilePic}" alt="${escapeHtml(state.username || 'You')}" style="width:100%;height:100%;object-fit:cover;display:block;">` : `<img src="${getDefaultCommentAvatar(state.username || 'You')}" alt="${escapeHtml(state.username || 'You')}" style="width:100%;height:100%;object-fit:cover;display:block;">`)} + '</div>'` : "''"};
+        var verifiedBadge = ${state.verified ? `'<span class="comment-verified"><svg viewBox="0 0 40 40" width="12" height="12" style="vertical-align:middle;display:inline-block;"><path fill="#0095f6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v6.354h6.234L14.638 40l5.36-3.094L25.358 40l2.972-5.15h6.234v-6.354L40 25.359 36.906 20 40 14.641l-5.436-3.137V5.15h-6.234L25.358 0l-5.36 3.094zM18 27.27L10.455 19.1l2.636-2.726L18 21.727l8.91-9.454 2.636 2.726L18 27.27z"/></svg></span>'` : "''"};
+        div.innerHTML = avatarSection +
+            '<div class="comment-body"><div class="comment-content"><span class="user">' + ${JSON.stringify(escapeHtml(state.username || 'you'))} + '</span>' + verifiedBadge + ' <span class="comment-text">' + text.replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</span></div></div><span class="comment-heart" onclick="this.classList.toggle(\\'liked\\');this.textContent=this.classList.contains(\\'liked\\')?\\'❤️\\':\\'🤍\\'">🤍</span>';
         commentsList.appendChild(div);
         commentInput.value = '';
     }
